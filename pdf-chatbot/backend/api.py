@@ -12,11 +12,21 @@ from sklearn.neighbors import NearestNeighbors
 import tensorflow_hub as hub
 from supabase import create_client, Client
 import openai
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Supabase setup
 supabase_url = "https://ieigojplepfjuqspepmz.supabase.co"
 supabase_key = os.getenv("SUPABASE_KEY")
-supabase: Client = create_client(supabase_url, supabase_key)
+supabase: Client = None
+
+def get_supabase_client():
+    global supabase
+    if supabase is None and supabase_key:
+        supabase = create_client(supabase_url, supabase_key)
+    return supabase
 
 # DeepSeek setup
 openai.api_key = os.getenv("DEEPSEEK_API_KEY")
@@ -119,13 +129,18 @@ def load_recommender(path, start_page=1):
 
 def generate_text(prompt, engine="deepseek-chat"):
     try:
-        response = openai.ChatCompletion.create(
+        client = openai.OpenAI(
+            api_key=os.getenv("DEEPSEEK_API_KEY"),
+            base_url="https://api.deepseek.com"
+        )
+        
+        response = client.chat.completions.create(
             model=engine,
             messages=[{"content": prompt, "role": "user"}],
             max_tokens=512,
             temperature=0.7
         )
-        message = response['choices'][0]['message']['content']
+        message = response.choices[0].message.content
     except Exception as e:
         message = f'API Error: {str(e)}'
     return message
@@ -179,18 +194,23 @@ async def upload_pdf(file: UploadFile = File(...), user_id: str = None):
         content = ' '.join(texts)
         
         # Save to Supabase
+        pdf_id = None
         if user_id:
-            pdf_data = {
-                "user_id": user_id,
-                "filename": file.filename,
-                "content": content,
-                "file_size": file.size
-            }
-            
-            result = supabase.table("pdfs").insert(pdf_data).execute()
-            pdf_id = result.data[0]["id"] if result.data else None
-        else:
-            pdf_id = None
+            client = get_supabase_client()
+            if client:
+                try:
+                    pdf_data = {
+                        "user_id": user_id,
+                        "filename": file.filename,
+                        "content": content,
+                        "file_size": file.size
+                    }
+                    
+                    result = client.table("pdfs").insert(pdf_data).execute()
+                    pdf_id = result.data[0]["id"] if result.data else None
+                except Exception as e:
+                    print(f"Supabase error: {e}")
+                    pdf_id = None
         
         return {
             "message": "PDF uploaded and processed successfully", 
@@ -216,14 +236,19 @@ async def chat(question: str, user_id: str = None, pdf_id: str = None):
         
         # Save chat to database
         if user_id and pdf_id:
-            chat_data = {
-                "user_id": user_id,
-                "pdf_id": pdf_id,
-                "message": question,
-                "response": answer
-            }
-            
-            supabase.table("chats").insert(chat_data).execute()
+            client = get_supabase_client()
+            if client:
+                try:
+                    chat_data = {
+                        "user_id": user_id,
+                        "pdf_id": pdf_id,
+                        "message": question,
+                        "response": answer
+                    }
+                    
+                    client.table("chats").insert(chat_data).execute()
+                except Exception as e:
+                    print(f"Supabase chat error: {e}")
         
         return {"answer": answer}
     
