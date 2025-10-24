@@ -3,12 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spled</title>
+    <title>Research File Downloader - Thailand Insight</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .iframe-container {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        .download-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e8f4f8;
+            border-radius: 8px;
+            border-left: 4px solid #2196F3;
+        }
+        .download-btn {
+            background-color: #2196F3;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: background-color 0.3s;
+        }
+        .download-btn:hover {
+            background-color: #1976D2;
+        }
+        .info-text {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        .archive-link {
+            color: #2196F3;
+            text-decoration: none;
+        }
+        .archive-link:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-  <div>
-    <h1>spled technical support</span>
-    <h3 style="font-weight: normal;">If you have any questions about our apps, please contact us by E-mail: <a href="mailto:spledapps@gmail.com">spledapps@gmail.com</a>.</h6>
-  </div>
+    <div class="container">
+        <h1>Thailand Insight Research File</h1>
+        
+        <div class="iframe-container">
+            <h3>Archive.org Viewer</h3>
+            <iframe 
+                src="https://archive.org/embed/thailandinsightg0000unse" 
+                width="500" 
+                height="30" 
+                frameborder="0" 
+                webkitallowfullscreen="true" 
+                mozallowfullscreen="true" 
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <div class="download-section">
+            <h3>Download Options</h3>
+            <p class="info-text">
+                Use the buttons below to download the research file in different formats. 
+                The file is hosted on Archive.org and contains valuable research data.
+            </p>
+            
+            <button class="download-btn" onclick="downloadFile('pdf')">Download as PDF</button>
+            <button class="download-btn" onclick="downloadFile('epub')">Download as EPUB</button>
+            <button class="download-btn" onclick="downloadFile('djvu')">Download as DJVU</button>
+            <button class="download-btn" onclick="downloadFile('txt')">Download as Text</button>
+            
+            <p class="info-text">
+                <strong>Direct Archive.org Link:</strong> 
+                <a href="https://archive.org/details/thailandinsightg0000unse" target="_blank" class="archive-link">
+                    View on Archive.org
+                </a>
+            </p>
+        </div>
+
+        <div style="margin-top: 30px; text-align: center; color: #666;">
+            <p>For technical support, contact: <a href="mailto:spledapps@gmail.com">spledapps@gmail.com</a></p>
+        </div>
+    </div>
+
+    <script>
+        function downloadFile(format) {
+            const baseUrl = 'https://archive.org/download/thailandinsightg0000unse/';
+            const filename = 'thailandinsightg0000unse';
+            
+            let downloadUrl;
+            switch(format) {
+                case 'pdf':
+                    downloadUrl = baseUrl + filename + '.pdf';
+                    break;
+                case 'epub':
+                    downloadUrl = baseUrl + filename + '.epub';
+                    break;
+                case 'djvu':
+                    downloadUrl = baseUrl + filename + '.djvu';
+                    break;
+                case 'txt':
+                    downloadUrl = baseUrl + filename + '_djvu.txt';
+                    break;
+                default:
+                    downloadUrl = baseUrl + filename + '.pdf';
+            }
+            
+            // Create a temporary link element and trigger download
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = `thailand_insight_research.${format}`;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Show user feedback
+            showDownloadMessage(format);
+        }
+        
+        function showDownloadMessage(format) {
+            const message = document.createElement('div');
+            message.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background-color: #4CAF50;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 5px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                z-index: 1000;
+                font-size: 14px;
+            `;
+            message.textContent = `Downloading ${format.toUpperCase()} file...`;
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                document.body.removeChild(message);
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
